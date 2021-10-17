@@ -39,7 +39,7 @@ class TicTacToe:
 
     def __init__(self):
         global canvasW, canvasH
-        # Reset the board.
+        # [Re]set the board.
         self.theBoard = [' '] * 9  # theBoard[0] is not used
         self.inputAgainstComputerOrOtherPerson()  # Sets self.next
         self.setMarkLetters()  # Sets self.mark
@@ -72,31 +72,33 @@ class TicTacToe:
         self.root.bind("<Configure>",         self.r_configure)  # The widget changed size
         self.root.bind("<ButtonRelease-1>",   self.r_buttonRelease_1)  # Left mouse clicked
 
-        print(f"{fl()} {self.root.geometry()=}")
+        # print(f"{fl()} {self.root.geometry()=}")
 
         canvasW -= 1  # Triggers the line drawing
+
+        self.alreadyAsked = False
 
         if self.turn == 'Computer':
             self.computerTurn()  # "theBoard" updated, nothing else, it will be displayed
             # in r_configure(), which will be called by tkinit
 
-        print(f"{fl()} BEF root.mainloop()")
-        breakpoint()  ###################################
+        # print(f"{fl()} BEF root.mainloop()")
+        # breakpoint()  ###################################
 
         self.root.mainloop()
-        print(f"{fl()} AFT root.mainloop()")
+        # print(f"{fl()} AFT root.mainloop()")
     # END OF __init__() ===================================
 
     def cont(self, root, ans):
         global gameIsPlaying
         gameIsPlaying = ans
-        print(f'{fl()} {ans=} {gameIsPlaying=}')
+        # print(f'{fl()} {ans=} {gameIsPlaying=}')
         # Both roots will be destroyed.
         root.destroy()
         self.root.destroy()
 
     def askCont(self):  # If the buttons are in root, they can't be seen
-        print(f'{fl()} Start')
+        # print(f'{fl()} Start')
         r = tk.Tk()
         # r.geometry('300x100') Let the widgets fill up the place
         r.title('Welcome to Tic-Tac_Toe!')
@@ -112,12 +114,12 @@ class TicTacToe:
                         command = lambda: self.cont(r, False))
         bn.grid(pady = 12)
         r.update()  # Get the Widget parameters updated
-        print(f'{fl()} {l.winfo_geometry()=}')
-        print(f'{fl()} {by.winfo_geometry()=}')
-        print(f'{fl()} {bn.winfo_geometry()=}')
-        print(f'{fl()} BEF r.mainloop()')
+        # print(f'{fl()} {l.winfo_geometry()=}')
+        # print(f'{fl()} {by.winfo_geometry()=}')
+        # print(f'{fl()} {bn.winfo_geometry()=}')
+        # print(f'{fl()} BEF r.mainloop()')
         r.mainloop()
-        print(f'{fl()} AFT r.mainloop()')
+        # print(f'{fl()} AFT r.mainloop()')
 
 
     # At start, without doing anything, this was called:
@@ -134,23 +136,25 @@ class TicTacToe:
         global canvasW, canvasH
         global gameIsPlaying
 
-        print(f'{fl()} {event.widget.winfo_name()=}  {gameIsPlaying=}')
+        # print(f'{fl()} {event.widget.winfo_name()=}  {gameIsPlaying=}')
         if gameIsPlaying == False and event.widget.winfo_name() == '!label':
-            print(f'{fl()} BEF root.after()')
-            self.root.after(10000, self.askCont)
-            print(f'{fl()} AFT root.after()')
+            if self.alreadyAsked == False:
+                self.alreadyAsked = True
+                # print(f'{fl()} BEF root.after()')
+                self.root.after(8000, self.askCont)
+                # print(f'{fl()} AFT root.after()')
 
-        print(f'{fl()} {event.widget.winfo_name()=}  {event.width=}  {event.height=}')
+        # print(f'{fl()} {event.widget.winfo_name()=}  {event.width=}  {event.height=}')
         if event.widget.winfo_name() != '!canvas':
-            print()
+            # print()
             return
         if self.root.children['!label'].winfo_height() < 5:
-            print(f"{fl()} {self.root.children['!label'].winfo_height()=}\n")
+            # print(f"{fl()} {self.root.children['!label'].winfo_height()=}\n")
             return  # It is NOT set, yet
 
         # breakpoint()
         w = event.width ; h = event.height
-        print(f'{fl()} {canvasW=} {canvasH=} {w=} {h=}')
+        # print(f'{fl()} {canvasW=} {canvasH=} {w=} {h=}')
         if canvasW == w and canvasH == h:
             return  # Nothing changed >>>>
 
@@ -162,7 +166,7 @@ class TicTacToe:
         lineW = max(int(min(w, h) / 64), 2)
         for i in (1, 2):  #     vertical                    horizontal
             for x in ((bw+i*sw, bh, bw+i*sw, h-bh), (bw, bh+i*sh, w-bw, bh+i*sh)):
-                print(f'{fl()} {x=}')
+                # print(f'{fl()} {x=}')
                 self.canvas.create_line(x, width=lineW)  # No weight= parameter here
 
         # Set up the midpoints                    0  1  2
@@ -171,8 +175,10 @@ class TicTacToe:
             for i in (0,1,2):
                 self.mps.append((int(bw+sw/2+i*sw), int(bh+sh/2+j*sh)))
 
+        """
         for xy in self.mps:
             print(f'{fl()} {xy=}')
+        """
 
         # Reprint the Board
         for i in range(len(self.theBoard)):
@@ -183,6 +189,7 @@ class TicTacToe:
             self.canvas.create_text(x, y, text=char,
                                 font=f"Arial {int(min(canvasW,canvasH)/5)} bold")
 
+        """
         for c in self.root.children:
             print(f'{fl()} root.children[{c}]={self.root.children[c]}')
             print(f'{fl()} root.children[{c}].winfo_geometry()='
@@ -194,10 +201,11 @@ class TicTacToe:
 
         print(f'{fl()} {event.x=}  {event.y=}')
         print(f"{fl()} {self.root.geometry()=}")
-        print(f"{fl()} {self.canvas['height']=}    {self.canvas['width']=}")
+        print(f"{fl()} {self.canvas['height']=}  {self.canvas['width']=}")
         print(f"{fl()} {self.canvas.winfo_geometry()=}\n")
         pass # To set breakpoint
         # breakpoint()
+        """
 
 
     # After clicking on Canvas:
@@ -205,11 +213,14 @@ class TicTacToe:
     # 2. this is called event.widget.winfo_name = '!canvas'
     def r_buttonRelease_1(self, event):
         global canvasW, canvasH
-        print(f'{fl()} {event.widget.winfo_name()=} {event.x=}  {event.y=}')
+        global gameIsPlaying
+
+        # print(f'{fl()} {event.widget.winfo_name()=} {event.x=}  {event.y=}')
         # breakpoint()
 
         if event.widget.winfo_name() != '!canvas':
-            self.label.configure(text = "Please, click on the board.")
+            if gameIsPlaying:
+                self.label.configure(text = "Please, click on the board.")
             return
 
         # To which middle point it is closer?
@@ -222,15 +233,27 @@ class TicTacToe:
 
         # Was it an empty place?
         if self.theBoard[I] != ' ':
-            self.label.configure(text="Please, choose an empty place.")
+            if gameIsPlaying:
+                self.label.configure(text="Please, choose an empty place.")
             return
 
         char = self.mark[self.turn]
         self.theBoard[I] = char
-        print(f"{fl()} {I=} {self.mps[I]=}")
+        # print(f"{fl()} {I=} {self.mps[I]=}")
         x, y = self.mps[I]
         self.canvas.create_text(x, y, text = char,
                                 font = f"Arial {int(min(canvasW,canvasH)/5)} bold")
+
+        if self.isWinner(self.theBoard, char):
+            # breakpoint()
+            self.label.configure(text = f'The {self.turn} won.')
+            gameIsPlaying = False
+            return
+
+        if self.isBoardFull(self.theBoard):
+            gameIsPlaying = False
+            self.label.configure(text='The game is a tie.')
+            return
 
         # Switch to the other player, if it is the Computer, make its move
         self.turn = self.next[self.turn]
@@ -238,19 +261,23 @@ class TicTacToe:
             field = self.computerTurn()  # It switches self.turn !
             if field != None:
                 char = self.mark['Computer']
-                print(f"{fl()} {char=} {field=} {self.mps[field]=}")
+                # print(f"{fl()} {char=} {field=} {self.mps[field]=}")
                 x, y = self.mps[field]
                 self.canvas.create_text(x, y, text = char,
                                         font = f"Arial {int(min(canvasW, canvasH) / 5)} bold")
+            return
 
-        pass # To set breakpoint
+        self.label.configure(text = f'{self.turn} turn ({self.mark[self.turn]})')
+
+        # print(f"{fl()} {self.theBoard=}")
+        # pass # To set breakpoint
         # breakpoint()
     # END OF r_buttonRelease_1(self, event)
 
 
     def __del__(self):  # destructor
-        print(f"{fl()} {gameIsPlaying=} {self.theBoard=}")
-        print(f"{fl()} Anything to here?")
+        # print(f"{fl()} {gameIsPlaying=} {self.theBoard=}")
+        # print(f"{fl()} Anything to do here?")
         pass  # Anything to here?
 
 
@@ -347,25 +374,6 @@ class TicTacToe:
         return board[move] == ' '
 
 
-    def getPlayerMove(self, board, player):
-        breakpoint()
-        # Let the player enter their move.
-        _move = ' '
-        while _move not in '1 2 3 4 5 6 7 8 9'.split() or not self.isSpaceFree(board, int(_move)):
-            if player == 'Player':
-                print('What is your next move? (1-9)')
-            else:
-                print(f'{player}, please enter your next move? (1-9)')
-            _move = input()
-            if not _move.isdigit():
-                print(f"Enter a digit (not '{_move}')")
-                continue
-            if not self.isSpaceFree(board, int(_move)):
-                print(f'board[{int(_move)}] is not free')
-
-        return int(_move)
-
-
     def chooseRandomMoveFromTuple(self, board, movesTuple):
         # Returns a valid move from the passed tuple on the passed board.
         # Returns None if there is no valid move.
@@ -408,7 +416,7 @@ class TicTacToe:
             return 4
 
         # Move on one of the sides.
-        breakpoint()
+        # breakpoint()
         return self.chooseRandomMoveFromTuple(board, (1, 3, 5, 7))
 
 
@@ -417,29 +425,6 @@ class TicTacToe:
         for i in range(9):
             if self.isSpaceFree(board, i):
                 return False
-        return True
-
-
-    def playerTurn(self, player):
-        global gameIsPlaying
-        t = f"{self.turn}, p" if self.turn != "Player" else 'P'
-        t += 'lease click on a square.'
-        self.label.configure(text = t)
-        _move = self.getPlayerMove(self.theBoard, player)
-        self.theBoard[ _move] = self.mark[player]
-        print(f"{fl()} {gameIsPlaying=} {self.theBoard=}")
-
-        if self.isWinner(self.theBoard, self.mark[player]):
-            self.label.configure(text = 'You have won the game!')
-            return False
-        else:
-            if self.isBoardFull(self.theBoard):
-                if gameIsPlaying == False:
-                    self.label.configure(text = 'The game is a tie!')
-                return False
-            else:
-                self.turn = self.next[self.turn]
-
         return True
 
 
@@ -455,12 +440,12 @@ class TicTacToe:
             else:
                 self.label.configure(text = 'The game is a tie.')
 
-            print(f"{fl()} {gameIsPlaying=} {self.theBoard=}")
+            # print(f"{fl()} {gameIsPlaying=} {self.theBoard=}")
             return None
 
         field = self.getComputerMove(self.theBoard, char)
         self.theBoard[field] = char
-        print(f"{fl()} {char=} {field=} {self.theBoard=}")
+        # print(f"{fl()} {char=} {field=} {self.theBoard=}")
 
         if self.isWinner(self.theBoard, char):
             # breakpoint()
@@ -479,12 +464,12 @@ class TicTacToe:
 # class TicTacToe ENDS here ============================
 
 while True:
-    print(f'{fl()} BEF t = TicTacToe()')
+    # print(f'{fl()} BEF t = TicTacToe()')
     t = TicTacToe()
-    print(f'{fl()} {gameIsPlaying=} AFT t = TicTacToe()')
+    # print(f'{fl()} {gameIsPlaying=} AFT t = TicTacToe()')
 
     if gameIsPlaying == False:
         break
 
-print(f'{fl()} AFT "while True" loop')
-breakpoint()
+# print(f'{fl()} AFT "while True" loop')
+# breakpoint()
